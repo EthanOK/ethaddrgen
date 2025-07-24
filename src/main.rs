@@ -29,6 +29,7 @@ use regex::Regex;
 use secp256k1::Secp256k1;
 use termcolor::{Color, ColorChoice, Buffer, BufferWriter};
 use typenum::U40;
+use std::time::Instant;
 
 type AddressLengthType = U40;
 
@@ -186,6 +187,7 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
     }
 
     let thread_count = num_cpus::get();
+    let start_time = Instant::now();
 
     loop {
         let mut threads = Vec::with_capacity(thread_count);
@@ -193,6 +195,7 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
         let iterations_this_second: Arc<Mutex<u32>> = Arc::new(Mutex::new(0));
         let alg = Arc::new(Secp256k1::new());
         let working_threads = Arc::new(Mutex::new(thread_count));
+        let total_iterations: Arc<Mutex<u64>> = Arc::new(Mutex::new(0));
 
         for _ in 0..thread_count {
             let working_threads = working_threads.clone();
@@ -200,6 +203,7 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
             let result = result.clone();
             let alg = alg.clone();
             let iterations_this_second = iterations_this_second.clone();
+            let total_iterations = total_iterations.clone();
 
             threads.push(thread::spawn(move || {
                 'dance:
@@ -229,6 +233,7 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
                     }
 
                     *iterations_this_second.lock().unwrap() += 1;
+                    *total_iterations.lock().unwrap() += 1;
                 }
 
                 *working_threads.lock().unwrap() -= 1;
@@ -243,6 +248,7 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
             let buffer_writer = buffer_writer.clone();
             let sync_buffer = sync_buffer.clone();
             let result = result.clone();
+            let start_time = start_time.clone(); 
 
             thread::spawn(move || 'dance: loop {
                               thread::sleep(Duration::from_secs(1));
@@ -254,12 +260,15 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
                                       break 'dance;
                                   }
                               }
+                              let elapsed = start_time.elapsed().as_secs(); 
+                              let total = *total_iterations.lock().unwrap(); 
 
                               let mut buffer = buffer_writer.lock().unwrap().buffer();
                               let mut iterations_per_second =
                                   iterations_this_second.lock().unwrap();
-                              cprint!(quiet, buffer, Color::Cyan, "{}", *iterations_per_second);
-                              cprintln!(quiet, buffer, Color::White, " addresses / second");
+                              cprint!(quiet, buffer, Color::Cyan, "Total Iterations: {}", total);
+                              cprint!(quiet, buffer, Color::Magenta, " (Already Wait {} Seconds)", elapsed);
+                              cprint!(quiet, buffer, Color::White, "\r");
                               *sync_buffer.lock().unwrap() = Some(buffer);
                               *iterations_per_second = 0;
                           });
