@@ -13,7 +13,8 @@ impl Pattern for String {
     }
 
     fn parse<T: AsRef<str>>(string: T) -> Result<Self, String> {
-        let string = string.as_ref().to_lowercase();
+        // let string = string.as_ref().to_lowercase();
+        let string = string.as_ref().to_string();
 
         if !ADDRESS_PATTERN.is_match(&string) {
             return Err("Pattern contains invalid characters".to_string());

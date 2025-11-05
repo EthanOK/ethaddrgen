@@ -40,7 +40,7 @@ const KECCAK_OUTPUT_BYTES: usize = 32;
 const ADDRESS_BYTE_INDEX: usize = KECCAK_OUTPUT_BYTES - ADDRESS_BYTES;
 
 lazy_static! {
-    static ref ADDRESS_PATTERN: Regex = Regex::new(r"^[0-9a-f]{1,40}$").unwrap();
+    static ref ADDRESS_PATTERN: Regex = Regex::new(r"^[0-9a-fA-F]{1,40}$").unwrap();
 }
 
 struct BruteforceResult {
@@ -224,6 +224,8 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
                     let public_key_array = &public_key.serialize_vec(&alg, false)[1..];
                     let keccak = tiny_keccak::keccak256(public_key_array);
                     let address = to_hex_string(&keccak[ADDRESS_BYTE_INDEX..], 40);  // get rid of the constant 0x04 byte
+                    let checksum_address = eth_checksum::checksum(&address);
+                    let address = checksum_address.strip_prefix("0x").unwrap().to_string();
 
                     if patterns.contains(&address) {
                         *result.lock().unwrap() = Some(BruteforceResult {
@@ -301,15 +303,13 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
         let result = result.as_ref().unwrap();
 
         {
-            let address_with_prefix = format!("0x{}", result.address);
-            let checksum_address = eth_checksum::checksum(&address_with_prefix);
             let mut stdout = buffer_writer.lock().unwrap().buffer();
             cprintln!(quiet,
                       stdout,
                       Color::White,
                       "---------------------------------------------------------------------------------------");
             cprint!(quiet, stdout, Color::White, "Found address: ");
-            cprintln!(quiet, stdout, Color::Yellow, "{}", checksum_address);
+            cprintln!(quiet, stdout, Color::Yellow, "0x{}", result.address);
             cprint!(quiet, stdout, Color::White, "Generated private key: ");
             cprintln!(quiet, stdout, Color::Red, "0x{}", result.private_key);
             cprintln!(quiet,
@@ -332,9 +332,7 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
         }
 
         if quiet {
-            let address_with_prefix = format!("0x{}", result.address);
-            let checksum_address = eth_checksum::checksum(&address_with_prefix);
-            println!("{}: 0x{}", checksum_address, result.private_key);
+            println!("0x{}: 0x{}", result.address, result.private_key);
         }
 
         if !matches.is_present("stream") {
