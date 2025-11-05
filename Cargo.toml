@@ -1,12 +1,19 @@
 [package]
 name = "ethaddrgen"
-version = "1.0.7"
-authors = ["Jakub Hlusička <limeth@protonmail.com>"]
+version = "1.0.8"
+authors = ["EthanOK", "Jakub Hlusička <limeth@protonmail.com>"]
 description = "Custom Ethereum address generator"
-keywords = ["ethereum", "cryptocurrency", "cracking", "hashing", "bruteforce"]
+keywords = [
+    "ethereum",
+    "cryptocurrency",
+    "cracking",
+    "hashing",
+    "bruteforce",
+    "checksum",
+]
 readme = "README.md"
 license = "GPL-3.0"
-repository = "https://github.com/Limeth/ethaddrgen/"
+repository = "https://github.com/EthanOK/ethaddrgen"
 
 [dependencies]
 rayon = "1.0"
