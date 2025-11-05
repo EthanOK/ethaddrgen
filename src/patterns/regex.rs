@@ -1,4 +1,4 @@
-use patterns::{Pattern, Patterns, parse_patterns};
+use patterns::{Pattern, Patterns, PatternConfig, parse_patterns};
 use std::sync::{Arc, Mutex};
 use regex::{Regex, RegexBuilder};
 use clap::ArgMatches;
@@ -9,9 +9,9 @@ impl Pattern for Regex {
         self.is_match(string)
     }
 
-    fn parse<T: AsRef<str>>(string: T) -> Result<Self, String> {
+    fn parse<T: AsRef<str>>(string: T, config: &PatternConfig) -> Result<Self, String> {
         match RegexBuilder::new(string.as_ref())
-                  .case_insensitive(false)
+                  .case_insensitive(config.case_insensitive)
                   .multi_line(false)
                   .dot_matches_new_line(false)
                   .ignore_whitespace(true)
@@ -28,8 +28,11 @@ pub struct RegexPatterns {
 }
 
 impl RegexPatterns {
-    pub fn new(buffer_writer: Arc<Mutex<BufferWriter>>, matches: &ArgMatches) -> RegexPatterns {
-        RegexPatterns { vec: parse_patterns(buffer_writer, matches) }
+    pub fn new(buffer_writer: Arc<Mutex<BufferWriter>>, matches: &ArgMatches, case_insensitive: bool) -> RegexPatterns {
+        let config = PatternConfig { case_insensitive };
+        let vec = parse_patterns(buffer_writer, matches, &config);
+
+        RegexPatterns { vec }
     }
 }
 

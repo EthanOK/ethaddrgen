@@ -1,5 +1,5 @@
 use {ADDRESS_PATTERN, AddressLengthType};
-use patterns::{Pattern, Patterns, parse_patterns};
+use patterns::{Pattern, Patterns, PatternConfig, parse_patterns};
 use std::borrow::Borrow;
 use std::sync::{Arc, Mutex};
 use clap::ArgMatches;
@@ -12,9 +12,12 @@ impl Pattern for String {
         string.starts_with(self)
     }
 
-    fn parse<T: AsRef<str>>(string: T) -> Result<Self, String> {
-        // let string = string.as_ref().to_lowercase();
-        let string = string.as_ref().to_string();
+    fn parse<T: AsRef<str>>(string: T, config: &PatternConfig) -> Result<Self, String> {
+        let mut string = string.as_ref().to_string();
+
+        if config.case_insensitive {
+            string = string.to_lowercase();
+        }
 
         if !ADDRESS_PATTERN.is_match(&string) {
             return Err("Pattern contains invalid characters".to_string());
@@ -27,11 +30,13 @@ impl Pattern for String {
 pub struct StringPatterns {
     // Strings of length `n` are in the `n-1`th index of this array
     sorted_vecs: GenericArray<Option<Vec<String>>, AddressLengthType>,
+    case_insensitive: bool,
 }
 
 impl StringPatterns {
-    pub fn new(buffer_writer: Arc<Mutex<BufferWriter>>, matches: &ArgMatches) -> StringPatterns {
-        let patterns = parse_patterns::<String>(buffer_writer, matches);
+    pub fn new(buffer_writer: Arc<Mutex<BufferWriter>>, matches: &ArgMatches, case_insensitive: bool) -> StringPatterns {
+        let config = PatternConfig { case_insensitive };
+        let patterns = parse_patterns::<String>(buffer_writer, matches, &config);
         let patterns_by_len: Arc<GenericArray<Mutex<Option<Vec<String>>>, AddressLengthType>> = Arc::new(arr![Mutex<Option<Vec<String>>>; Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None), Mutex::new(None)]);
 
         patterns.par_iter()
@@ -58,7 +63,7 @@ impl StringPatterns {
                      })
         });
 
-        StringPatterns { sorted_vecs }
+        StringPatterns { sorted_vecs, case_insensitive }
     }
 }
 
@@ -70,9 +75,17 @@ impl Patterns for StringPatterns {
                 let pattern_len = index + 1;
                 let target_address_slice = &address[0..pattern_len];
 
-                if vec.binary_search_by(|item| item.as_str().cmp(target_address_slice))
-                       .is_ok() {
-                    return true;
+                if self.case_insensitive {
+                    // Case-insensitive matching: convert address slice to lowercase
+                    let target_slice = target_address_slice.to_lowercase();
+                    if vec.binary_search_by(|item| item.as_str().cmp(target_slice.as_str())).is_ok() {
+                        return true;
+                    }
+                } else {
+                    // Case-sensitive matching: default behavior
+                    if vec.binary_search_by(|item| item.as_str().cmp(target_address_slice)).is_ok() {
+                        return true;
+                    }
                 }
             }
         }

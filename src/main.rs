@@ -104,6 +104,11 @@ plain string matching to regex pattern matching."))
              .short("s")
              .help("Keep outputting results")
              .long_help("Instead of outputting a single result, keep outputting until terminated."))
+        .arg(Arg::with_name("case-insensitive")
+             .long("ignore-case")
+             .short("i")
+             .help("Case-insensitive matching")
+             .long_help("Perform case-insensitive matching when comparing addresses with patterns."))
         .arg(Arg::with_name("PATTERN")
              .help("The pattern to match the address against")
              .long_help("The pattern to match the address against.
@@ -119,12 +124,14 @@ patterns as regex patterns, which replaces the basic string comparison.")
     let color_choice = parse_color_choice(matches.value_of("color").unwrap()).unwrap();
     let buffer_writer = Arc::new(Mutex::new(BufferWriter::stdout(color_choice)));
 
+    let case_insensitive = matches.is_present("case-insensitive");
+
     if matches.is_present("regexp") {
-        let patterns = Arc::new(RegexPatterns::new(buffer_writer.clone(), &matches));
+        let patterns = Arc::new(RegexPatterns::new(buffer_writer.clone(), &matches, case_insensitive));
 
         main_pattern_type_selected(matches, quiet, buffer_writer, patterns);
     } else {
-        let patterns = Arc::new(StringPatterns::new(buffer_writer.clone(), &matches));
+        let patterns = Arc::new(StringPatterns::new(buffer_writer.clone(), &matches, case_insensitive));
 
         main_pattern_type_selected(matches, quiet, buffer_writer, patterns);
     };
