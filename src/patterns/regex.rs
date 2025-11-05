@@ -11,7 +11,7 @@ impl Pattern for Regex {
 
     fn parse<T: AsRef<str>>(string: T) -> Result<Self, String> {
         match RegexBuilder::new(string.as_ref())
-                  .case_insensitive(true)
+                  .case_insensitive(false)
                   .multi_line(false)
                   .dot_matches_new_line(false)
                   .ignore_whitespace(true)
