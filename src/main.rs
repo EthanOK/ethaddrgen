@@ -12,6 +12,7 @@ extern crate termcolor;
 #[macro_use]
 extern crate generic_array;
 extern crate typenum;
+extern crate eth_checksum;
 
 #[macro_use]
 mod macros;
@@ -300,15 +301,17 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
         let result = result.as_ref().unwrap();
 
         {
+            let address_with_prefix = format!("0x{}", result.address);
+            let checksum_address = eth_checksum::checksum(&address_with_prefix);
             let mut stdout = buffer_writer.lock().unwrap().buffer();
             cprintln!(quiet,
                       stdout,
                       Color::White,
                       "---------------------------------------------------------------------------------------");
             cprint!(quiet, stdout, Color::White, "Found address: ");
-            cprintln!(quiet, stdout, Color::Yellow, "0x{}", result.address);
+            cprintln!(quiet, stdout, Color::Yellow, "{}", checksum_address);
             cprint!(quiet, stdout, Color::White, "Generated private key: ");
-            cprintln!(quiet, stdout, Color::Red, "{}", result.private_key);
+            cprintln!(quiet, stdout, Color::Red, "0x{}", result.private_key);
             cprintln!(quiet,
                       stdout,
                       Color::White,
@@ -316,7 +319,7 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
             cprintln!(quiet,
                       stdout,
                       Color::Green,
-                      "Buy me a cup of coffee; my ethereum address: 0xc0ffee3bd37d408910ecab316a07269fc49a20ee");
+                      "❤️ Buy me a cup of coffee; my ethereum address: 0xc0ffee00c42f0D0E9e47a9F4FE9B58Cba05Df6A3");
             cprintln!(quiet,
                       stdout,
                       Color::White,
@@ -329,7 +332,9 @@ fn main_pattern_type_selected<P: Patterns + 'static>(matches: ArgMatches,
         }
 
         if quiet {
-            println!("0x{} {}", result.address, result.private_key);
+            let address_with_prefix = format!("0x{}", result.address);
+            let checksum_address = eth_checksum::checksum(&address_with_prefix);
+            println!("{}: 0x{}", checksum_address, result.private_key);
         }
 
         if !matches.is_present("stream") {

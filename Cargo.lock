@@ -115,10 +115,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "740178ddf48b1a9e878e6d6509a1442a2d42fd2928aae8e7a6f8a36fb01981b3"
 
 [[package]]
+name = "eth_checksum"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0451da8f79bc717a33d8edd5f11b8fc7d510fd0a3b14f78361ff647f677da0d0"
+dependencies = [
+ "rust-crypto",
+]
+
+[[package]]
 name = "ethaddrgen"
 version = "1.0.7"
 dependencies = [
  "clap",
+ "eth_checksum",
  "generic-array",
  "lazy_static 0.2.11",
  "num_cpus",
@@ -182,9 +192,9 @@ checksum = "c8f31047daa365f19be14b47c29df4f7c3b581832407daabe6ae77397619237d"
 
 [[package]]
 name = "libc"
-version = "0.2.36"
+version = "0.2.177"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e5d97d6708edaa407429faa671b942dc0f2727222fb6b6539bf1db936e4b121"
+checksum = "2874a2af47a2325c2001a6e6fad9b16a53b802102b528163885171cf92b15976"
 
 [[package]]
 name = "memchr"
@@ -320,6 +330,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8e931c58b93d86f080c734bfd2bce7dd0079ae2331235818133c8be7f422e20e"
 
 [[package]]
+name = "rust-crypto"
+version = "0.2.36"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f76d05d3993fd5f4af9434e8e436db163a12a9d40e1a58a726f27a01dfd12a2a"
+dependencies = [
+ "gcc",
+ "libc",
+ "rand 0.3.22",
+ "rustc-serialize",
+ "time",
+]
+
+[[package]]
 name = "rustc-serialize"
 version = "0.3.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -440,6 +463,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "time"
+version = "0.1.45"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b797afad3f312d1c66a56d11d0316f916356d11bd158fbc6ca6389ff6bf805a"
+dependencies = [
+ "libc",
+ "wasi",
+ "winapi",
+]
+
+[[package]]
 name = "tiny-keccak"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -489,6 +523,12 @@ name = "void"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
+
+[[package]]
+name = "wasi"
+version = "0.10.0+wasi-snapshot-preview1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a143597ca7c7793eff794def352d41792a93c481eb1042423ff7ff72ba2c31f"
 
 [[package]]
 name = "winapi"

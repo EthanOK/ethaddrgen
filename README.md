@@ -1,10 +1,10 @@
-# ethaddrgen
+# ethaddrgen [CPU]
 [![Build Status](https://travis-ci.org/Limeth/ethaddrgen.svg?branch=master)](https://travis-ci.org/Limeth/ethaddrgen)
 [![Build status](https://ci.appveyor.com/api/projects/status/tbnkiqgiqkrmtbcc?svg=true)](https://ci.appveyor.com/project/Limeth/ethaddrgen)
 #### Custom Ethereum address generator
 Get a shiny ethereum address and stand out from the crowd!
 
-[![asciicast](https://asciinema.org/a/cmidn81zwi1c2n49ij4co9pg9.png)](https://asciinema.org/a/cmidn81zwi1c2n49ij4co9pg9)
+⛔️
 Disclaimer: Do not use the private key shown in this demo; it's public, strangers could steal your Eth. Never share your private key with anyone. It's your and only your responsibility to keep your private key in secret.
 
 ## Features
@@ -35,7 +35,14 @@ If you are on Windows, use `ethaddrgen.exe` instead of `ethaddrgen`.
 ethaddrgen -e '^[abcdef]{10}'
 ```
 Note that while supplying multiple regex patterns is supported, it is not recommended to use a large list of regex patterns.
-
+##### Prefix matching
+```sh
+ethaddrgen -e '^abc'
+```
+##### Suffix matching
+```sh
+ethaddrgen -e '^.*abc$'
+```
 #### Using pattern lists (dictionaries)
 If no patterns are provided as arguments, patterns are read from the standard input. You can provide data to the standard input in various ways, depending on your platform:
 * Windows:
